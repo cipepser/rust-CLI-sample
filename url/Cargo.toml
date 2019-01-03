@@ -1,0 +1,7 @@
+[package]
+name = "url"
+version = "0.1.0"
+authors = ["cipepser <respepic@gmail.com>"]
+
+[dependencies]
+url = "1.7"
