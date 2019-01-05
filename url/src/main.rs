@@ -2,6 +2,8 @@ extern crate url;
 extern crate failure;
 extern crate structopt;
 extern crate atty;
+extern crate log;
+extern crate pretty_env_logger;
 
 use std::io::{self, Read};
 use url::percent_encoding::percent_decode;
@@ -38,7 +40,9 @@ fn is_stdin(input: Option<&String>) -> bool {
 }
 
 fn main() -> Result<()> {
+    pretty_env_logger::init();
     let opt = Opt::from_args();
+    log::debug!("opt: {:?}", opt);
 
     if opt.input.is_none() && !is_stdin(opt.input.as_ref()) {
         Opt::clap().print_help()?;
