@@ -27,6 +27,7 @@ install:
   - cargo install --force cross
 
 script:
+  - cd url
   - cross test --target $TARGET --release
 
 before_deploy:
