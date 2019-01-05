@@ -1,0 +1,53 @@
+# Based on the "trust" template v0.1.2
+# https://github.com/japaric/trust/tree/v0.1.2
+
+dist: trusty
+language: rust
+services: docker
+rust:
+  - stable
+sudo: required
+env:
+  global:
+    # defile cli name
+    -  NAME=url
+
+matrix:
+  include:
+    - env: TARGET=x86_64-unknown-linux-musl
+    - env: TARGET=x86_64-apple-darwin
+      os: osx
+    - env: TARGET=x86_64-pc-windows-gnu
+
+before_install:
+  - rustup self update
+
+install:
+  - source ~/.cargo/env
+  - cargo install --force cross
+
+script:
+  - cross test --traget $TARGET --release
+
+before_deploy:
+  - cross build --target $TARGET --release
+  - bin=$NAME
+  - if [[ $TARGET = "x86_64-pc-windows-gnu" ]]; then bin=$NAME.exe; fi
+  - tar czf $NAME-$TRAVIS_TAG-$TARGET.tar.gz -C target/$TARGET/release $bin
+
+deploy:
+  file_glob: true
+  file: $NAME-$TRAVIS_TAG-$TARGET.*
+  on:
+    tags: true
+  provider: releases
+  skip_cleanup: true
+
+cache: cargo
+before_cache:
+  - chmod -R a+r $HOME/.cargo
+
+branches:
+  only:
+    - /^v?\d+\.\d+\.\d+.*$/
+    - master
