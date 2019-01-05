@@ -1,16 +1,22 @@
 extern crate url;
 extern crate failure;
+extern crate structopt;
 
 use url::percent_encoding::percent_decode;
 use failure::Error;
+use structopt::StructOpt;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-fn main() -> Result<()> {
-    let args: Vec<String> = std::env::args().collect();
-    let input = &args[1];
+#[derive(StructOpt, Debug)]
+struct Opt {
+    #[structopt(name = "INPUT")]
+    input: String,
+}
 
-    Ok(println!("{}", decode(input)?))
+fn main() -> Result<()> {
+    let opt = Opt::from_args();
+    Ok(println!("{}", decode(&opt.input)?))
 }
 
 fn decode(input: &str) -> Result<String> {

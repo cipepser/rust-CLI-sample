@@ -6,3 +6,4 @@ authors = ["cipepser <respepic@gmail.com>"]
 [dependencies]
 url = "1.7"
 failure = "0.1"
+structopt = "0.2"
