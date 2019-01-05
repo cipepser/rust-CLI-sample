@@ -7,3 +7,4 @@ authors = ["cipepser <respepic@gmail.com>"]
 url = "1.7"
 failure = "0.1"
 structopt = "0.2"
+atty = "0.2"

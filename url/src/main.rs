@@ -1,22 +1,60 @@
 extern crate url;
 extern crate failure;
 extern crate structopt;
+extern crate atty;
 
+use std::io::{self, Read};
 use url::percent_encoding::percent_decode;
 use failure::Error;
 use structopt::StructOpt;
+use atty::Stream;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(StructOpt, Debug)]
 struct Opt {
     #[structopt(name = "INPUT")]
-    input: String,
+    input: Option<String>,
+}
+
+fn read_from_stdin() -> Result<String> {
+    let mut buf = String::new();
+    let stdin = io::stdin();
+    let mut handle = stdin.lock();
+    handle.read_to_string(&mut buf)?;
+
+    Ok(buf)
+}
+
+fn is_stdin(input: Option<&String>) -> bool {
+    let is_request = match input {
+        Some(i) if i == "-" => true,
+        _ => false,
+    };
+
+    let is_pipe = !atty::is(Stream::Stdin);
+
+    is_request || is_pipe
 }
 
 fn main() -> Result<()> {
     let opt = Opt::from_args();
-    Ok(println!("{}", decode(&opt.input)?))
+
+    if opt.input.is_none() && !is_stdin(opt.input.as_ref()) {
+        Opt::clap().print_help()?;
+        std::process::exit(1);
+    }
+
+    let input = match opt.input {
+        Some(i) => i,
+        None => read_from_stdin()?
+    };
+
+    if input.is_empty() {
+        Opt::clap().get_matches().usage();
+    }
+
+    Ok(println!("{}", decode(&input)?))
 }
 
 fn decode(input: &str) -> Result<String> {
